@@ -19,8 +19,11 @@ const items = [
 ]
 
 export default function Home() {
+  const [searching, setSearch] = useState([])
   const [inventory, setInventory] = useState([])
   const [open, setOpen] = useState(false)
+  const [sea, setSearchOpen] = useState(false)
+  const [searchName, setSearchWord] = useState('')
   const [itemName, setItemName] = useState('')
   const style = {
     transform: 'translate(-50%, -50%)',
@@ -37,6 +40,25 @@ export default function Home() {
       });
     })
     setInventory(inventoryList)
+  }
+
+  const search = async (item) =>{
+    if(item == ""){
+      return;
+    }
+
+    const docRef = doc(collection(firestore, 'inventory'), item)
+    const docSnap = await getDoc(docRef)
+    const list = []
+    console.log( "ITEM:" + item)
+
+    if(docSnap.exists()){
+      console.log("HIHIHIHI")
+      const number = docSnap.data()
+      list.push(number['quantity'])
+    }
+
+    setSearch(list)
   }
 
   const addItem = async (item) => {
@@ -72,8 +94,12 @@ export default function Home() {
     updateInventory()
   }, [])
 
+
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
+
+  const searchOpen = () => setSearchOpen(true)
+  const searchClose = () => setSearchOpen(false)
 
   return <Box 
     width = "100vw"
@@ -84,17 +110,60 @@ export default function Home() {
     flexDirection={'column'}
     bgcolor={"#8aecff"}
   >
-    {
-        inventory.forEach((item) =>{
-          return (
-          <>
-            {item.name}
-            {item.quantity}
-          </>
-          )
-        })
-      }
-      
+      <Modal 
+        open = {sea} 
+        onClose={searchClose}
+        
+      >
+        <Box sx={style}
+          position='absolute' 
+          top='50%' 
+          left='50%' 
+          transform = 'translate(-50%, -50%)'
+          width={400}
+          bgcolor= 'white'
+          border = "2px solid #000"
+          boxShadow={24}
+          p={4}
+          display="flex"
+          flexDirection="column"
+          gap={3}
+        >
+          <Box>
+            <TextField
+              variant="outlined"
+              fullWidth
+              value={searchName}
+              onChange={(e) => setSearchWord(e.target.value)}
+            >
+
+            </TextField>
+            <Button variant = "contained" onClick = {() => search(searchName)}>
+              Search
+            </Button>
+          </Box>
+          <Stack height={100}>
+            {
+              searching.map(
+                (amount) => {
+                  return <Box
+                    key = {amount}
+                  >
+                    <Typography
+                    variant = {"h4"}
+                    color = {'black'}
+                    textAlign={'center'}
+                    fontWeight={'bold'}
+                    >
+                      Quantity: {amount}
+                    </Typography>
+                  </Box>
+                }
+              )
+            }
+          </Stack>
+        </Box>
+      </Modal>   
       <Modal 
         open = {open} 
         onClose={handleClose}
@@ -152,9 +221,13 @@ export default function Home() {
         </Box>
       </Modal>
 
-      <Box>
+      <Box width = {'100%'} display={"flex"} flexDirection={'row'} justifyContent={'space-around'}>
         <Button variant="contained" onClick={handleOpen}>
           Add New Item
+        </Button>
+
+        <Button variant = "contained" onClick = {searchOpen}>
+          Search
         </Button>
       </Box>
     <Box border={'1px solid #333'}>
@@ -169,7 +242,8 @@ export default function Home() {
 
       </Box>
       <Stack width = "800px" height = "400px" spacing = {2} overflow={'auto'}>
-        {inventory.map(({name, quantity})=>(
+        {inventory.map(
+          ({name, quantity})=>(
           <Box 
             key = {name}
             width = "750px"
