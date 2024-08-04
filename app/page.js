@@ -1,95 +1,102 @@
+"use client";
+
 import Image from "next/image";
-import styles from "./page.module.css";
+import { Box, Stack, Typography } from "@mui/material";
+import { useState, useEffect } from "react";
+import { firestore } from "@/firebase";
+import { query } from "firebase/firestore";
+
+const items = [
+  'tomato',
+  'potato',
+  'onion',
+  'garlic',
+  'ginger',
+  'carrot',
+  'beans',
+  'brocolli',
+  'new jeans'
+]
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const [inventory, setInventory] = useState([])
+  const [open, setOpen] = useState(false)
+  const [item, setItemName] = useState('')
+
+  const updateInventory = async () =>{
+    const snapShot = query(collection(firestore, 'pantry'))
+    const docs = await getDocs(snapShot)
+    const inventoryList = []
+    docs.forEach((doc) =>{
+      inventoryList.push({
+        name: doc.id,
+        ...doc.data(),
+      });
+    })
+    setInventory(inventoryList)
+    console.log("inventory")
+  }
+
+  useEffect(()=>{
+    updateInventory()
+  }, [])
+
+  return <Box 
+    width = "100vw"
+    height = "100vh"
+    display={"flex"}
+    justifyContent = {"center"}
+    alignItems = {"center"}
+    flexDirection={'column'}
+    bgcolor={"#8aecff"}
+  >
+    <Box border={'1px solid #333'}>
+      {
+        inventory.forEach((item) =>{
+          return (<>
+            {item.name}
+            {item.count}
+          </>)
+        })
+      }
+      <Box
+        width='800px'
+        height='100px'
+        bgcolor={'#7c82ff'}
+      >
+        <Typography variant="h2" color={'#333'} textAlign={'center'}>
+          Pantry Items
+        </Typography>
+
+      </Box>
+      <Stack width = "800px" height = "400px" spacing = {2} overflow={'auto'}>
+        {items.map((i)=>(
+          <Box 
+            key = {i}
+            width = "750px"
+            height = "200px"
+            display = {"flex"}
+            justifyContent={'center'}
+            alignItems={'center'}
+            textAlign={'center'}
+            bgcolor={'$f0f0f0'}
+
           >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+            <Typography
+              variant = {"h4"}
+              color = {'#333'}
+              textAlign={'center'}
+              fontWeight={'bold'}
+            >
+              {
+                i.charAt(0).toUpperCase() + i.slice(1)
+              }
+            </Typography>
+          </Box>
+        ))
+        }
+      </Stack>
+    </Box>
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+  </Box>;
 }
