@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { firestore } from "@/app/firebase";
 import { query,collection, getDocs, getDoc, doc, setDoc, deleteDoc } from "firebase/firestore";
+import {Camera} from "react-camera-pro";
 
 const items = [
   'tomato',
@@ -101,9 +102,14 @@ export default function Home() {
   const searchOpen = () => setSearchOpen(true)
   const searchClose = () => setSearchOpen(false)
 
+
+  //Camera stuff
+  const camera = useRef(null);
+  const [image, setImage] = useState(null);
+
   return <Box 
     width = "100vw"
-    height = "100vh"
+    height = "auto"
     display={"flex"}
     justifyContent = {"space-around"}
     alignItems = {"center"}
@@ -281,6 +287,15 @@ export default function Home() {
         }
       </Stack>
     </Box>
-
+    <Box 
+        width={400} 
+        height={300} 
+        display={'flex'}
+        flexDirection={'row'}
+      >
+          <Camera ref={camera} aspectRatio={16/9}/>
+          <button onClick={() => setImage(camera.current.takePhoto())}>Take photo</button>
+          <img src={image} alt='Taken photo'/>
+      </Box>
   </Box>;
 }
