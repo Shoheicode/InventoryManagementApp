@@ -138,7 +138,7 @@ export default function Home() {
           <Box>
             <TextField
               variant="outlined"
-              fullWidth
+              fullWidth = {true}
               value={searchName}
               onChange={(e) => setSearchWord(e.target.value)}
             >
