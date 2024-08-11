@@ -206,7 +206,7 @@ export default function Home() {
               id="outlined-basic"
               label="Item"
               variant="outlined"
-              fullWidth
+              fullWidth ={true}
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
             >
